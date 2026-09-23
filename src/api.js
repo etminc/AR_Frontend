@@ -37,6 +37,7 @@ const CLIENT_SORTS = new Set([
 const DEFAULT_CLIENT_SORT = "over90";
 const DEFAULT_SORT_DIRECTION = "desc";
 const API_MODES = new Set(["auto", "mock", "remote"]);
+const BUILD_TIME_API_BASE_URL = import.meta.env?.VITE_API_BASE_URL;
 const AGING_BUCKET_META = Object.freeze({
   current: { label: "Current", ageDays: 15 },
   days31to60: { label: "31-60", ageDays: 45 },
@@ -86,12 +87,11 @@ export function configureApi(options = {}) {
 
 export function getApiConfig() {
   const runtime = isRecord(globalThis.AR_API_CONFIG) ? globalThis.AR_API_CONFIG : {};
+  const runtimeBaseUrl =
+    overrides.baseUrl ?? runtime.baseUrl ?? globalThis.AR_API_BASE_URL;
+  const metaBaseUrl = readMetaContent("ar-api-base-url")?.trim() || undefined;
   const baseUrl = cleanBaseUrl(
-    overrides.baseUrl ??
-      runtime.baseUrl ??
-      globalThis.AR_API_BASE_URL ??
-      readMetaContent("ar-api-base-url") ??
-      "",
+    runtimeBaseUrl ?? metaBaseUrl ?? BUILD_TIME_API_BASE_URL ?? "",
   );
   const requestedMode = overrides.mode ?? runtime.mode ?? "auto";
   if (!API_MODES.has(requestedMode)) {
