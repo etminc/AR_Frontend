@@ -40,6 +40,13 @@ test("mock mode exposes deterministic data for every API function", async () => 
 
   assert.equal(overview.division, "ETM");
   assert.ok(overview.metrics.totalAr > 0);
+  for (const leaders of [overview.leaders.collectors, overview.leaders.projectManagers]) {
+    assert.deepEqual(leaders.map((item) => item.rank), leaders.map((_, index) => index + 1));
+    assert.deepEqual(
+      leaders.map((item) => item.collected),
+      leaders.map((item) => item.collected).toSorted((left, right) => right - left),
+    );
+  }
   assert.ok(managers.items.every((item) => item.division === "ETM"));
   assert.equal(manager.entity.id, managers.items[0].id);
   assert.ok(collectors.items.every((item) => item.division === "ETM"));

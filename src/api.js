@@ -338,11 +338,19 @@ function buildOverview(division) {
     },
     aging: { current, previous },
     leaders: {
-      collectors: collectors.slice().sort(byCollected).slice(0, 3),
-      projectManagers: projectManagers.slice().sort(byCollected).slice(0, 3),
+      collectors: rankLeadersByCollected(collectors),
+      projectManagers: rankLeadersByCollected(projectManagers),
     },
     health: healthCounts(clients),
   };
+}
+
+function rankLeadersByCollected(items) {
+  return items
+    .slice()
+    .sort(byCollected)
+    .slice(0, 3)
+    .map((item, index) => ({ ...item, rank: index + 1 }));
 }
 
 function buildProjectManagerSummaries(division) {

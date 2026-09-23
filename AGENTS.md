@@ -22,7 +22,7 @@ The API host must never be hardcoded. Runtime configuration should come from the
 - Render loading, empty, and error states deliberately.
 - Escape or construct DOM content safely; do not inject API strings through unsafe `innerHTML` paths.
 - Keep the layout usable on narrow screens and printable on standard office paper.
-- Run the complete test/check command before committing.
+- Run `npm run check` and the real-browser `npm run test:visual` suite before committing UI changes; inspect every generated screenshot, not only the exit code.
 
 ## Agent responsibilities for this build
 
@@ -36,3 +36,4 @@ The API host must never be hardcoded. Runtime configuration should come from the
 - 2026-09-23: Initialized the modular dashboard build, API boundary, local fallback strategy, and multi-agent ownership rules.
 - 2026-09-23: Implemented the four-view responsive dashboard, configurable API adapter, documented `/v1` contract, deterministic reconciled mock data, accessible interactions, print styling, and automated API/frontend contract checks.
 - 2026-09-23: Replaced the temporary Python serving instructions with a JavaScript-only Vite development, production-build, and preview workflow.
+- 2026-09-23: Added a real-browser visual regression suite after fixing the viewport-height toolbar ribbon that covered dashboard content.

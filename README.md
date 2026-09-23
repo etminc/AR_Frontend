@@ -64,6 +64,14 @@ The command syntax-checks the browser/API/data modules, runs the full Node test 
 3. Exercise all four tabs, all three division filters, global search, both detail selectors, every client-table sort, a client dialog, and Print.
 4. Resize to a narrow viewport and confirm only the client table scrolls horizontally.
 
+Run the real-browser visual suite separately:
+
+```powershell
+npm run test:visual
+```
+
+The visual suite launches the Vite app in installed Edge or Chrome, opens every dashboard view, selects representative PM/collector data, opens a client dialog, checks desktop and mobile layout geometry, and saves screenshots plus `report.json` under the ignored `test-results/visual/` directory. Set `BROWSER_PATH` if the browser is installed outside the standard Windows locations.
+
 ## Structure
 
 - `index.html` — semantic dashboard shell.
@@ -74,4 +82,5 @@ The command syntax-checks the browser/API/data modules, runs the full Node test 
 - `src/format.js` — small date and keyboard-navigation utilities with isolated tests.
 - `docs/API.md` — future backend contract and runtime configuration.
 - `tests/` — API, reconciliation, and frontend contract smoke tests.
+- `scripts/visual-smoke.mjs` — real-browser navigation, geometry assertions, and screenshot capture.
 - `dist/` — generated production bundle (ignored by Git).
