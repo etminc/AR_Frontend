@@ -242,6 +242,12 @@ button, select { cursor: pointer; }
   font-weight: 700;
 }
 .notice[hidden] { display: none; }
+.static-data-notice {
+  background: #fff0c2;
+  color: #5d4300;
+  border-bottom: 1px solid #d7ad38;
+}
+.static-data-notice strong { letter-spacing: .08em; }
 .loading-notice { background: var(--lime-soft); color: var(--olive-900); }
 .error-notice { background: #f8ded8; color: #7b2718; }
 .error-notice button { border: 1px solid currentColor; border-radius: 5px; background: transparent; color: inherit; padding: 3px 8px; font-weight: 700; }

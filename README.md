@@ -37,19 +37,34 @@ Vite writes the optimized static application to `dist/`. Preview that exact prod
 npm run preview
 ```
 
-The project is frontend-only. It has no Python server and no application backend. In production, publish the generated `dist/` directory to a static web host.
+The generated `dist/` directory is the Azure Static Web Apps artifact. The API is a separately deployed Azure Function App; it is not bundled into the Static Web App.
 
 ## Data modes
 
-The application defaults to deterministic local mock data, so no backend is required today. The sample invoice data is incomplete; clearly marked `Unallocated AR` placeholders reconcile the mock aging, invoice, project, and client totals.
+`VITE_API_BASE_URL` is public build-time configuration. Set it to the Function App origin only, for example `https://your-function-app.azurewebsites.net`. Do not include `/v1`; `src/api.js` adds the existing versioned routes.
 
-When the future service exists, set its base URL in `index.html`:
+- When the URL is absent, auto mode deliberately uses the bundled deterministic mock data.
+- When the URL is present, auto mode uses the remote Function App.
+- A configured remote request that fails is shown as an error. It never silently falls back to mock data.
+- An overview response containing `"dataSource": "static-placeholder"` displays the accessible `STATIC PLACEHOLDER DATA` notice. The bundled mock overview always includes that marker.
 
-```html
-<meta name="ar-api-base-url" content="https://service.example/ar-api" />
+For local remote-mode development, copy [.env.example](.env.example) to `.env.local`, replace the sample host, and restart Vite:
+
+```powershell
+Copy-Item .env.example .env.local
+npm run dev
 ```
 
-The host above is illustrative only. Do not include `/v1`; the client adds versioned paths. A configured base URL switches auto mode to remote data. Runtime alternatives and every required route/response are documented in [docs/API.md](docs/API.md).
+Leave `VITE_API_BASE_URL` unset to exercise mock mode. The sample invoice data is incomplete; clearly marked `Unallocated AR` entries reconcile the mock aging, invoice, project, and client totals. Runtime overrides for tests and specialized hosting are documented in [docs/API.md](docs/API.md).
+
+## Configure Azure Static Web Apps
+
+1. Deploy the Function App with the API routes at `/v1/...`. Its Function host routing must not add a second prefix such as `/api`.
+2. In the Function App CORS settings, allow the production Static Web App origin (and any preview origins that need API access).
+3. In the frontend GitHub repository, open **Settings → Secrets and variables → Actions → Variables**.
+4. Create the repository variable `VITE_API_BASE_URL` with the Function App origin, such as `https://your-function-app.azurewebsites.net`. This is a public URL, not a secret. Do not add `/v1`.
+5. Run the `Azure Static Web Apps CI/CD` workflow. Its build step forwards `${{ vars.VITE_API_BASE_URL }}` to Vite; changing the variable requires a new build/deployment.
+6. In the deployed browser, confirm the network request targets `https://<function-app-host>/v1/dashboard/overview?division=all`. If the backend is still serving placeholder data, also confirm the `STATIC PLACEHOLDER DATA` notice is visible.
 
 ## Verify changes
 
@@ -57,7 +72,7 @@ The host above is illustrative only. Do not include `/v1`; the client adds versi
 npm run check
 ```
 
-The command syntax-checks the browser/API/data modules, runs the full Node test suite, and creates a production Vite build. A complete local smoke test is:
+The command syntax-checks the browser/API/data modules, runs the full Node test suite (including a production-build API URL check), and creates a production Vite build. A complete local smoke test is:
 
 1. Run `npm run check` with no failures.
 2. Run `npm run preview`.
@@ -77,10 +92,10 @@ The visual suite launches the Vite app in installed Edge or Chrome, opens every 
 - `index.html` — semantic dashboard shell.
 - `styles.css` — responsive, accessible, and print styling.
 - `src/app.js` — browser state, rendering, and interactions.
-- `src/api.js` — the only module that knows future HTTP routes.
+- `src/api.js` — the only module that knows Function App HTTP routes and configuration.
 - `src/mock-data.js` — deterministic development data.
 - `src/format.js` — small date and keyboard-navigation utilities with isolated tests.
-- `docs/API.md` — future backend contract and runtime configuration.
+- `docs/API.md` — Function App contract and frontend configuration.
 - `tests/` — API, reconciliation, and frontend contract smoke tests.
 - `scripts/visual-smoke.mjs` — real-browser navigation, geometry assertions, and screenshot capture.
 - `dist/` — generated production bundle (ignored by Git).

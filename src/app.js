@@ -30,6 +30,7 @@ const dom = {
   tabs: [...document.querySelectorAll("[role='tab']")],
   views: [...document.querySelectorAll("[role='tabpanel']")],
   divisionButtons: [...document.querySelectorAll(".division-button")],
+  staticDataBanner: document.querySelector("#static-data-banner"),
   loadingBanner: document.querySelector("#loading-banner"),
   errorBanner: document.querySelector("#error-banner"),
   errorMessage: document.querySelector("#error-message"),
@@ -270,6 +271,7 @@ function renderCompactClients(container, clients = []) {
 async function loadOverview() {
   const data = await request("overview", (signal) => getDashboardOverview({ division: state.division, signal }));
   if (!data) return;
+  dom.staticDataBanner.hidden = data.dataSource !== "static-placeholder";
   renderKpis(document.querySelector("#executive-kpis"), data.metrics);
   renderAging(document.querySelector("#executive-aging"), data.aging);
   renderLeaders(document.querySelector("#executive-leaders"), data.leaders);

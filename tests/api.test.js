@@ -39,6 +39,7 @@ test("mock mode exposes deterministic data for every API function", async () => 
   const directory = await searchDirectory("holley", { division: "ETM" });
 
   assert.equal(overview.division, "ETM");
+  assert.equal(overview.dataSource, "static-placeholder");
   assert.ok(overview.metrics.totalAr > 0);
   for (const leaders of [overview.leaders.collectors, overview.leaders.projectManagers]) {
     assert.deepEqual(leaders.map((item) => item.rank), leaders.map((_, index) => index + 1));
