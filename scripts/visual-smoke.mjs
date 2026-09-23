@@ -140,6 +140,7 @@ async function inspectAndCapture({ Page, Runtime }, name) {
     const headerRect = header.getBoundingClientRect();
     const mainRect = main.getBoundingClientRect();
     const pseudoHeight = Number.parseFloat(pseudo.height) || 0;
+    const staticDataBanner = document.querySelector('#static-data-banner');
     return {
       viewport: { width: innerWidth, height: innerHeight },
       toolbar: { height: toolbarRect.height, bottom: toolbarRect.bottom },
@@ -150,6 +151,11 @@ async function inspectAndCapture({ Page, Runtime }, name) {
       leaderRanks: [...document.querySelectorAll('#executive-leaders .leader-group')].map((group) =>
         [...group.querySelectorAll('.leader-rank')].map((rank) => rank.textContent.trim())
       ),
+      staticDataBanner: staticDataBanner ? {
+        hidden: staticDataBanner.hidden,
+        role: staticDataBanner.getAttribute('role'),
+        text: staticDataBanner.textContent.trim(),
+      } : null,
       bodyScrollWidth: document.documentElement.scrollWidth,
       bodyClientWidth: document.documentElement.clientWidth,
     };
@@ -165,6 +171,16 @@ async function inspectAndCapture({ Page, Runtime }, name) {
   if (metrics.main.height < 100) failures.push("main dashboard content is not visibly laid out");
   if (metrics.bodyScrollWidth > metrics.bodyClientWidth + 1) {
     failures.push(`page overflows horizontally (${metrics.bodyScrollWidth}px > ${metrics.bodyClientWidth}px)`);
+  }
+  if (!metrics.staticDataBanner || metrics.staticDataBanner.hidden) {
+    failures.push("static placeholder data indicator is not visible");
+  } else {
+    if (metrics.staticDataBanner.role !== "status") {
+      failures.push("static placeholder data indicator does not expose status semantics");
+    }
+    if (!metrics.staticDataBanner.text.includes("STATIC PLACEHOLDER DATA")) {
+      failures.push("static placeholder data indicator is missing its explicit label");
+    }
   }
   for (const ranks of metrics.leaderRanks) {
     const expected = ranks.map((_, index) => String(index + 1));
