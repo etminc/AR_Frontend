@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#3f4827" />
+    <meta name="ar-api-base-url" content="" />
+    <title>ETM AR Collections Command Center</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to dashboard content</a>
+
+    <header class="site-header">
+      <div class="brand-row">
+        <div class="brand-mark" aria-hidden="true">ETM</div>
+        <div class="brand-copy">
+          <p class="eyebrow">Finance operations</p>
+          <h1>AR Collections Command Center</h1>
+          <p id="period-label" class="period-label">Current receivables snapshot</p>
+        </div>
+        <dl class="header-summary" aria-label="Portfolio summary">
+          <div>
+            <dt>Total AR</dt>
+            <dd id="header-total-ar">—</dd>
+          </div>
+          <div>
+            <dt>Collected</dt>
+            <dd id="header-collected">—</dd>
+          </div>
+          <div>
+            <dt>Rate</dt>
+            <dd id="header-rate">—</dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="toolbar">
+        <nav class="tabs" aria-label="Dashboard views" role="tablist">
+          <button class="tab active" id="tab-executive" type="button" role="tab" aria-selected="true" aria-controls="view-executive" data-view="executive">Executive</button>
+          <button class="tab" id="tab-pm" type="button" role="tab" aria-selected="false" aria-controls="view-pm" data-view="pm">PM Detail</button>
+          <button class="tab" id="tab-collectors" type="button" role="tab" aria-selected="false" aria-controls="view-collectors" data-view="collectors">Collectors</button>
+          <button class="tab" id="tab-clients" type="button" role="tab" aria-selected="false" aria-controls="view-clients" data-view="clients">Client Detail</button>
+        </nav>
+
+        <div class="toolbar-actions">
+          <div class="division-filter" role="group" aria-label="Filter by division">
+            <button class="division-button active" type="button" data-division="All" aria-pressed="true">All</button>
+            <button class="division-button" type="button" data-division="ETM" aria-pressed="false">ETM</button>
+            <button class="division-button" type="button" data-division="SUR" aria-pressed="false">Survey</button>
+          </div>
+
+          <div class="search-control">
+            <label class="sr-only" for="global-search">Search clients, project managers, and collectors</label>
+            <input id="global-search" type="search" placeholder="Search directory…" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="search-results" />
+            <div id="search-results" class="search-results" role="listbox" hidden></div>
+          </div>
+
+          <button id="print-button" class="print-button" type="button" aria-label="Print current dashboard view">
+            <span aria-hidden="true">↗</span> Print
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="notice-stack" aria-live="polite" aria-atomic="true">
+      <div id="loading-banner" class="notice loading-notice" hidden>
+        <span class="spinner" aria-hidden="true"></span>
+        <span>Refreshing dashboard data…</span>
+      </div>
+      <div id="error-banner" class="notice error-notice" role="alert" hidden>
+        <span id="error-message">The dashboard could not be loaded.</span>
+        <button id="retry-button" type="button">Try again</button>
+      </div>
+    </div>
+
+    <main id="main-content" tabindex="-1">
+      <section class="view active" id="view-executive" role="tabpanel" aria-labelledby="tab-executive">
+        <div class="view-heading">
+          <div>
+            <p class="eyebrow dark">Portfolio pulse</p>
+            <h2>Executive overview</h2>
+          </div>
+          <p>Company-wide receivables, risk, and collection momentum.</p>
+        </div>
+
+        <div id="executive-kpis" class="kpi-grid" aria-label="Executive key performance indicators"></div>
+
+        <div class="dashboard-grid two-thirds">
+          <article class="panel">
+            <div class="panel-heading">
+              <div>
+                <p class="panel-kicker">Portfolio mix</p>
+                <h3>Aging composition</h3>
+              </div>
+              <span class="panel-badge">Current balance</span>
+            </div>
+            <div id="executive-aging"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-heading">
+              <div>
+                <p class="panel-kicker">Collection pace</p>
+                <h3>Leaderboard</h3>
+              </div>
+            </div>
+            <div id="executive-leaders"></div>
+          </article>
+        </div>
+
+        <article class="panel">
+          <div class="panel-heading">
+            <div>
+              <p class="panel-kicker">Outreach coverage</p>
+              <h3>Client health</h3>
+            </div>
+          </div>
+          <div id="executive-health"></div>
+        </article>
+      </section>
+
+      <section class="view" id="view-pm" role="tabpanel" aria-labelledby="tab-pm" hidden>
+        <div class="view-heading detail-heading">
+          <div>
+            <p class="eyebrow dark">Portfolio owner</p>
+            <h2>Project manager detail</h2>
+          </div>
+          <label class="entity-selector">
+            <span>Project manager</span>
+            <select id="pm-select"><option value="">Choose a project manager</option></select>
+          </label>
+        </div>
+        <div id="pm-empty" class="empty-state">Choose a project manager to review their receivables portfolio.</div>
+        <div id="pm-content" hidden>
+          <div id="pm-kpis" class="kpi-grid"></div>
+          <div class="dashboard-grid two-thirds">
+            <article class="panel">
+              <div class="panel-heading"><div><p class="panel-kicker">Balance profile</p><h3>Aging composition</h3></div></div>
+              <div id="pm-aging"></div>
+            </article>
+            <article class="panel">
+              <div class="panel-heading"><div><p class="panel-kicker">Action readiness</p><h3>Client health</h3></div></div>
+              <div id="pm-health"></div>
+            </article>
+          </div>
+          <article class="panel">
+            <div class="panel-heading"><div><p class="panel-kicker">Owned accounts</p><h3>Client portfolio</h3></div></div>
+            <div id="pm-clients" class="compact-client-list"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="view" id="view-collectors" role="tabpanel" aria-labelledby="tab-collectors" hidden>
+        <div class="view-heading detail-heading">
+          <div>
+            <p class="eyebrow dark">Collection owner</p>
+            <h2>Collector detail</h2>
+          </div>
+          <label class="entity-selector">
+            <span>Collector</span>
+            <select id="collector-select"><option value="">Choose a collector</option></select>
+          </label>
+        </div>
+        <div id="collector-empty" class="empty-state">Choose a collector to review assigned receivables.</div>
+        <div id="collector-content" hidden>
+          <div id="collector-kpis" class="kpi-grid"></div>
+          <div class="dashboard-grid two-thirds">
+            <article class="panel">
+              <div class="panel-heading"><div><p class="panel-kicker">Balance profile</p><h3>Aging composition</h3></div></div>
+              <div id="collector-aging"></div>
+            </article>
+            <article class="panel">
+              <div class="panel-heading"><div><p class="panel-kicker">Action readiness</p><h3>Client health</h3></div></div>
+              <div id="collector-health"></div>
+            </article>
+          </div>
+          <article class="panel">
+            <div class="panel-heading"><div><p class="panel-kicker">Assigned accounts</p><h3>Client portfolio</h3></div></div>
+            <div id="collector-clients" class="compact-client-list"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="view" id="view-clients" role="tabpanel" aria-labelledby="tab-clients" hidden>
+        <div class="view-heading">
+          <div>
+            <p class="eyebrow dark">Account-level follow-up</p>
+            <h2>Client detail</h2>
+          </div>
+          <p id="client-count">All open-balance clients.</p>
+        </div>
+        <article class="panel client-panel">
+          <div class="table-wrap">
+            <table class="client-table">
+              <caption class="sr-only">Clients with open receivables. Activate a row to view invoice and project details.</caption>
+              <thead>
+                <tr>
+                  <th scope="col" data-sort="name" aria-sort="ascending"><button type="button">Client <span aria-hidden="true">↕</span></button></th>
+                  <th scope="col" data-sort="projectManagerName"><button type="button">Project manager <span aria-hidden="true">↕</span></button></th>
+                  <th scope="col" data-sort="totalAr"><button type="button">Total AR <span aria-hidden="true">↕</span></button></th>
+                  <th scope="col" data-sort="over90"><button type="button">91+ days <span aria-hidden="true">↕</span></button></th>
+                  <th scope="col" data-sort="lastContactDate"><button type="button">Last contact <span aria-hidden="true">↕</span></button></th>
+                  <th scope="col" data-sort="status"><button type="button">Health <span aria-hidden="true">↕</span></button></th>
+                </tr>
+              </thead>
+              <tbody id="client-table-body"></tbody>
+            </table>
+          </div>
+          <p id="clients-empty" class="empty-state" hidden>No clients match the current filters.</p>
+        </article>
+      </section>
+    </main>
+
+    <dialog id="client-dialog" class="client-dialog" aria-labelledby="dialog-title" aria-modal="true">
+      <div class="dialog-shell">
+        <div class="dialog-header">
+          <div>
+            <p class="eyebrow">Account detail</p>
+            <h2 id="dialog-title">Client</h2>
+          </div>
+          <button id="dialog-close" class="dialog-close" type="button" aria-label="Close client detail">×</button>
+        </div>
+        <div id="dialog-content" class="dialog-content"></div>
+      </div>
+    </dialog>
+
+    <noscript><p class="noscript">This dashboard requires JavaScript to load receivables data.</p></noscript>
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>
