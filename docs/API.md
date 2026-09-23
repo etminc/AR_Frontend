@@ -1,6 +1,6 @@
 # AR Collections API Contract
 
-This document defines the future read-only backend expected by `src/api.js`. No backend host is selected yet. The frontend runs against deterministic mock data until a base URL is configured.
+This document defines the read-only Azure Function App contract expected by `src/api.js`. The frontend runs against deterministic mock data only while no backend URL is configured.
 
 ## Runtime configuration
 
@@ -9,13 +9,16 @@ Configuration is resolved in this order:
 1. `configureApi({ baseUrl, mode })` during application bootstrap.
 2. `globalThis.AR_API_CONFIG = { baseUrl, mode }` before `src/api.js` is used.
 3. `globalThis.AR_API_BASE_URL`.
-4. `<meta name="ar-api-base-url" content="">` in the document head.
+4. A non-empty `<meta name="ar-api-base-url" content="">` value in the document head.
+5. The Vite build-time value `VITE_API_BASE_URL`.
 
 `mode` is `"auto"` (default), `"mock"`, or `"remote"`. Auto mode uses remote data only when a non-empty base URL exists. Otherwise it uses bundled mock data. A configured remote service failure is surfaced to the UI; it does not silently fall back to sample data.
 
 An unsupported mode from runtime globals is rejected as an `API_CONFIG_ERROR`; it is never treated as remote or mock implicitly.
 
-The base URL may include a path prefix, such as `https://service.example/ar-api`. It must not include `/v1`. The repository intentionally contains no real host.
+For Azure deployment, `VITE_API_BASE_URL` is the Function App origin only, such as `https://your-function-app.azurewebsites.net`. It must not include `/v1`; the client appends `/v1` to every route. The Function host must therefore expose these routes without Azure Functions' default `/api` route prefix. `VITE_*` values are embedded in the browser bundle and must never contain secrets.
+
+The Static Web Apps workflow passes the GitHub Actions repository variable `${{ vars.VITE_API_BASE_URL }}` into the Vite build. Updating that variable requires rebuilding and redeploying the frontend. The Function App must allow the deployed Static Web App origin in CORS.
 
 All routes return JSON and use `Accept: application/json`. Responses may be the documented payload directly or wrapped as `{ "data": <payload> }`. Monetary values are JSON numbers denominated in US dollars. Rates are decimals (`0.25` means 25%). Dates are `YYYY-MM-DD`. IDs are opaque strings and callers URL-encode them.
 
@@ -38,6 +41,7 @@ Response:
 
 ```json
 {
+  "dataSource": "static-placeholder",
   "period": {
     "asOf": "2026-09-12",
     "comparisonDate": "2026-08-29",
@@ -65,6 +69,8 @@ Response:
   "health": { "onTrack": 10, "dueSoon": 4, "missed": 2, "escalation": 1 }
 }
 ```
+
+`dataSource` is optional for live data. When the complete response is backed by sample/static records, set it to the stable value `"static-placeholder"`; the frontend then displays `STATIC PLACEHOLDER DATA`. The bundled mock response and the initial placeholder Function implementation use this marker.
 
 ### `GET /v1/project-managers?division={division}`
 

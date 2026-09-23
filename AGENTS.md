@@ -8,11 +8,11 @@ Build a maintainable, browser-based AR Collections Command Center inspired by th
 
 - `index.html`, `styles.css`, and `src/app.js` own presentation and browser interactions.
 - `src/api.js` is the only module that knows HTTP routes or the configured API base URL.
-- `src/mock-data.js` supplies deterministic local data while the future backend URL is unspecified.
-- `docs/API.md` is the source of truth for the future backend contract.
+- `src/mock-data.js` supplies deterministic local data when the backend URL is absent.
+- `docs/API.md` is the source of truth for the Azure Function App contract.
 - Tests live under `tests/` and must not depend on a live service.
 
-The API host must never be hardcoded. Runtime configuration should come from the `ar-api-base-url` meta value or another explicitly documented runtime setting. Local mock mode must remain usable until the backend exists.
+The API host must never be hardcoded. Azure Static Web Apps receives the Function App origin through the public build-time `VITE_API_BASE_URL` variable; documented runtime overrides remain available for tests and specialized hosting. Local mock mode must remain usable when no URL is configured, and configured remote failures must never fall back silently.
 
 ## Implementation expectations
 
@@ -37,3 +37,4 @@ The API host must never be hardcoded. Runtime configuration should come from the
 - 2026-09-23: Implemented the four-view responsive dashboard, configurable API adapter, documented `/v1` contract, deterministic reconciled mock data, accessible interactions, print styling, and automated API/frontend contract checks.
 - 2026-09-23: Replaced the temporary Python serving instructions with a JavaScript-only Vite development, production-build, and preview workflow.
 - 2026-09-23: Added a real-browser visual regression suite after fixing the viewport-height toolbar ribbon that covered dashboard content.
+- 2026-09-23: Wired the separately hosted Function App origin into Vite/SWA builds, retained absent-URL mock mode without remote-failure fallback, documented Azure/GitHub setup, and added the accessible static-placeholder data notice.

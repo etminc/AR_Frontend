@@ -3,15 +3,15 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { test } from "node:test";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { build } from "vite";
 
-const root = path.resolve(new URL("..", import.meta.url).pathname.slice(1));
+const root = path.resolve(fileURLToPath(new URL("..", import.meta.url)));
 
 test("production build embeds VITE_API_BASE_URL and selects remote mode", async () => {
   const outputDirectory = await mkdtemp(path.join(tmpdir(), "ar-api-build-"));
-  const configuredBaseUrl = "https://function.example.test/ar-api";
+  const configuredBaseUrl = "https://function.example.test";
   const previousBaseUrl = process.env.VITE_API_BASE_URL;
 
   try {
@@ -25,20 +25,49 @@ test("production build embeds VITE_API_BASE_URL and selects remote mode", async 
         lib: {
           entry: path.join(root, "src", "api.js"),
           formats: ["es"],
-          fileName: "api",
+          fileName: () => "api.mjs",
         },
       },
     });
 
-    const builtFile = path.join(outputDirectory, "api.js");
+    const builtFile = path.join(outputDirectory, "api.mjs");
     const builtSource = await readFile(builtFile, "utf8");
     const builtApi = await import(`${pathToFileURL(builtFile).href}?test=${Date.now()}`);
 
-    assert.match(builtSource, /https:\/\/function\.example\.test\/ar-api/);
+    assert.match(builtSource, /https:\/\/function\.example\.test/);
     assert.deepEqual(builtApi.getApiConfig(), {
       baseUrl: configuredBaseUrl,
       mode: "remote",
     });
+
+    builtApi.configureApi({ mode: "mock" });
+    const placeholderOverview = await builtApi.getDashboardOverview();
+    let requestedUrl;
+    builtApi.configureApi({
+      fetchImpl: async (url) => {
+        requestedUrl = url;
+        return new Response(JSON.stringify(placeholderOverview), {
+          headers: { "Content-Type": "application/json" },
+        });
+      },
+    });
+
+    const remoteOverview = await builtApi.getDashboardOverview();
+    assert.equal(
+      requestedUrl,
+      "https://function.example.test/v1/dashboard/overview?division=all",
+    );
+    assert.equal(remoteOverview.dataSource, "static-placeholder");
+
+    builtApi.configureApi({
+      fetchImpl: async () => {
+        throw new Error("Function App unavailable");
+      },
+    });
+    await assert.rejects(
+      () => builtApi.getDashboardOverview(),
+      (error) => error.code === "NETWORK_ERROR",
+    );
   } finally {
     if (previousBaseUrl === undefined) delete process.env.VITE_API_BASE_URL;
     else process.env.VITE_API_BASE_URL = previousBaseUrl;

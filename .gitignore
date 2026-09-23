@@ -3,3 +3,6 @@ dist/
 .vite/
 *.log
 test-results/
+.env
+.env.local
+.env.*.local
