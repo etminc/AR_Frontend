@@ -323,6 +323,7 @@ function buildOverview(division) {
   const collected = projectManagers.reduce((sum, item) => sum + item.collected, 0);
 
   return {
+    dataSource: "static-placeholder",
     period: MOCK_PERIOD,
     division,
     metrics: {
