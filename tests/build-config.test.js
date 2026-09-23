@@ -45,3 +45,26 @@ test("production build embeds VITE_API_BASE_URL and selects remote mode", async 
     await rm(outputDirectory, { recursive: true, force: true });
   }
 });
+
+test("Static Web Apps build receives the repository API URL variable", async () => {
+  const workflow = await readFile(
+    new URL(
+      "../.github/workflows/azure-static-web-apps-delightful-plant-0963da40f.yml",
+      import.meta.url,
+    ),
+    "utf8",
+  );
+  const envExample = await readFile(new URL("../.env.example", import.meta.url), "utf8");
+
+  assert.match(
+    workflow,
+    /VITE_API_BASE_URL:\s*\$\{\{\s*vars\.VITE_API_BASE_URL\s*\}\}/,
+  );
+
+  const exampleLine = envExample
+    .split(/\r?\n/)
+    .find((line) => line.startsWith("VITE_API_BASE_URL="));
+  assert.ok(exampleLine, ".env.example documents VITE_API_BASE_URL");
+  const exampleUrl = new URL(exampleLine.slice("VITE_API_BASE_URL=".length));
+  assert.equal(exampleUrl.pathname, "/", "the configured value is a base host without /v1");
+});
