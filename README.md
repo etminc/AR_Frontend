@@ -4,16 +4,40 @@ A modular, browser-based accounts-receivable dashboard inspired by the provided 
 
 ## Run locally
 
-1. From this repository, start a static server:
+Requires Node.js 20.19+ or Node.js 22.12+.
+
+1. Install the JavaScript dependencies:
 
    ```powershell
-   py -m http.server 4173 --bind 127.0.0.1
+   npm install
    ```
 
-2. Open `http://127.0.0.1:4173/`.
-3. Confirm that Executive, PM Detail, Collectors, and Client Detail all open; the All/ETM/Survey filters change the totals; and a client row opens invoice/project detail.
+2. Start the Vite development server:
 
-Opening `index.html` directly is not supported because browser ES modules require HTTP delivery.
+   ```powershell
+   npm run dev
+   ```
+
+3. Open the local URL printed by Vite, normally `http://localhost:5173/`.
+4. Confirm that Executive, PM Detail, Collectors, and Client Detail all open; the All/ETM/Survey filters change the totals; and a client row opens invoice/project detail.
+
+`npm start` is available as an alias for `npm run dev`.
+
+## Build and preview
+
+Create the deployable production bundle:
+
+```powershell
+npm run build
+```
+
+Vite writes the optimized static application to `dist/`. Preview that exact production bundle locally with:
+
+```powershell
+npm run preview
+```
+
+The project is frontend-only. It has no Python server and no application backend. In production, publish the generated `dist/` directory to a static web host.
 
 ## Data modes
 
@@ -29,16 +53,14 @@ The host above is illustrative only. Do not include `/v1`; the client adds versi
 
 ## Verify changes
 
-Requires Node.js 20 or newer.
-
 ```powershell
 npm run check
 ```
 
-The command syntax-checks the browser/API/data modules and runs the full Node test suite. A complete local smoke test is:
+The command syntax-checks the browser/API/data modules, runs the full Node test suite, and creates a production Vite build. A complete local smoke test is:
 
 1. Run `npm run check` with no failures.
-2. Serve the repository over HTTP.
+2. Run `npm run preview`.
 3. Exercise all four tabs, all three division filters, global search, both detail selectors, every client-table sort, a client dialog, and Print.
 4. Resize to a narrow viewport and confirm only the client table scrolls horizontally.
 
@@ -52,3 +74,4 @@ The command syntax-checks the browser/API/data modules and runs the full Node te
 - `src/format.js` — small date and keyboard-navigation utilities with isolated tests.
 - `docs/API.md` — future backend contract and runtime configuration.
 - `tests/` — API, reconciliation, and frontend contract smoke tests.
+- `dist/` — generated production bundle (ignored by Git).

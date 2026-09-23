@@ -35,3 +35,4 @@ The API host must never be hardcoded. Runtime configuration should come from the
 
 - 2026-09-23: Initialized the modular dashboard build, API boundary, local fallback strategy, and multi-agent ownership rules.
 - 2026-09-23: Implemented the four-view responsive dashboard, configurable API adapter, documented `/v1` contract, deterministic reconciled mock data, accessible interactions, print styling, and automated API/frontend contract checks.
+- 2026-09-23: Replaced the temporary Python serving instructions with a JavaScript-only Vite development, production-build, and preview workflow.
